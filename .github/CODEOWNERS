@@ -1,0 +1,36 @@
+# Global code owners
+* @doronsun
+
+# Frontend code
+/frontend/ @doronsun
+
+# Backend code
+/api/ @doronsun
+/compose/chat-api/ @doronsun
+
+# Kubernetes manifests
+/k8s/ @doronsun
+
+# Helm charts
+/helm/ @doronsun
+
+# CI/CD workflows
+/.github/workflows/ @doronsun
+
+# Documentation
+*.md @doronsun
+/docs/ @doronsun
+
+# Docker configurations
+**/Dockerfile @doronsun
+**/docker-compose*.yml @doronsun
+
+# Configuration files
+**/*.yml @doronsun
+**/*.yaml @doronsun
+**/*.json @doronsun
+**/*.env* @doronsun
+
+# Scripts
+/scripts/ @doronsun
+*.sh @doronsun

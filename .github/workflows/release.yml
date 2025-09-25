@@ -1,0 +1,141 @@
+name: 🚀 Release Automation
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: 📦 Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 📋 Get version from tag
+      id: get_version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: 📝 Generate release notes
+      id: release_notes
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+        echo "## 🎉 Release $VERSION" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### ✨ New Features" >> release_notes.md
+        echo "- 🤖 AI-powered chatbot with Hebrew/English support" >> release_notes.md
+        echo "- 🏗️ Microservices architecture with FastAPI + React" >> release_notes.md
+        echo "- ☸️ Kubernetes deployment with auto-scaling" >> release_notes.md
+        echo "- 🔒 Enterprise-grade security (TLS, RBAC, Network policies)" >> release_notes.md
+        echo "- 📊 Comprehensive monitoring (Prometheus + Grafana)" >> release_notes.md
+        echo "- 🚀 CI/CD pipeline with GitHub Actions" >> release_notes.md
+        echo "- 🐳 Docker containerization with multi-stage builds" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### 🏗️ Architecture" >> release_notes.md
+        echo "- Frontend: React 18 + TypeScript + Tailwind CSS" >> release_notes.md
+        echo "- Backend: FastAPI + Python 3.11 + AsyncIO" >> release_notes.md
+        echo "- AI: Ollama with Llama 3.2 and Phi-3 models" >> release_notes.md
+        echo "- Database: PostgreSQL 15 with replication" >> release_notes.md
+        echo "- Cache: Redis 7 with clustering" >> release_notes.md
+        echo "- Monitoring: Prometheus + Grafana + Loki" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### 📚 Documentation" >> release_notes.md
+        echo "- Complete README with architecture diagrams" >> release_notes.md
+        echo "- Comprehensive API documentation" >> release_notes.md
+        echo "- Deployment guides for Docker and Kubernetes" >> release_notes.md
+        echo "- Security best practices guide" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### 🚀 Quick Start" >> release_notes.md
+        echo '```bash' >> release_notes.md
+        echo '# Quick start' >> release_notes.md
+        echo './quick-start.sh' >> release_notes.md
+        echo "" >> release_notes.md
+        echo '# Production deployment' >> release_notes.md
+        echo './scripts/deploy.sh production' >> release_notes.md
+        echo '```' >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### 🔗 Links" >> release_notes.md
+        echo "- 📖 [Documentation](https://github.com/doronsun/org-chatbot#readme)" >> release_notes.md
+        echo "- 🐳 [Docker Hub](https://hub.docker.com/r/doronsun/org-chatbot)" >> release_notes.md
+        echo "- ☸️ [Helm Chart](https://github.com/doronsun/org-chatbot-helm)" >> release_notes.md
+        echo "- 📊 [Demo](https://org-chatbot-demo.vercel.app)" >> release_notes.md
+    
+    - name: 📦 Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        release_name: 🚀 Release ${{ steps.get_version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+    
+    - name: 🏷️ Update package.json version
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+        # Remove 'v' prefix if present
+        VERSION_NUMBER=${VERSION#v}
+        
+        # Update frontend package.json
+        if [ -f "frontend/package.json" ]; then
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION_NUMBER\"/" frontend/package.json
+        fi
+        
+        # Update any other version files
+        echo "Version updated to $VERSION_NUMBER"
+    
+    - name: 📊 Generate metrics
+      run: |
+        echo "## 📊 Project Statistics" >> metrics.md
+        echo "" >> metrics.md
+        echo "### 📁 Files and Lines" >> metrics.md
+        echo "- **Total files**: $(find . -type f -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.yml" -o -name "*.yaml" | wc -l)" >> metrics.md
+        echo "- **Lines of code**: $(find . -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.tsx" | xargs wc -l | tail -1 | awk '{print $1}')" >> metrics.md
+        echo "- **Documentation files**: $(find . -name "*.md" | wc -l)" >> metrics.md
+        echo "- **Configuration files**: $(find . -name "*.yml" -o -name "*.yaml" -o -name "*.json" | wc -l)" >> metrics.md
+        echo "" >> metrics.md
+        echo "### 🏗️ Architecture Components" >> metrics.md
+        echo "- **Frontend**: React + TypeScript + Tailwind CSS" >> metrics.md
+        echo "- **Backend**: FastAPI + Python 3.11" >> metrics.md
+        echo "- **AI Engine**: Ollama with multiple LLM models" >> metrics.md
+        echo "- **Database**: PostgreSQL 15 with replication" >> metrics.md
+        echo "- **Cache**: Redis 7 with clustering" >> metrics.md
+        echo "- **Monitoring**: Prometheus + Grafana + Loki" >> metrics.md
+        echo "- **Orchestration**: Kubernetes with Helm charts" >> metrics.md
+        echo "- **CI/CD**: GitHub Actions with automated testing" >> metrics.md
+    
+    - name: 📤 Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: metrics.md
+        asset_name: project-metrics.md
+        asset_content_type: text/markdown
+    
+    - name: 🎯 Post-release tasks
+      run: |
+        echo "🎉 Release ${{ steps.get_version.outputs.version }} created successfully!"
+        echo "📦 Release assets uploaded"
+        echo "📊 Metrics generated"
+        echo "🔗 Release URL: https://github.com/doronsun/org-chatbot/releases/tag/${{ steps.get_version.outputs.version }}"
