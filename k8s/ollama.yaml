@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-config
+  namespace: org-chatbot
+data:
+  models.yaml: |
+    models:
+      - name: "llama3.2:3b"
+        description: "Fast and efficient model for real-time responses"
+        priority: 1
+        max_tokens: 2048
+      - name: "phi3:3.8b"
+        description: "High-quality model for complex queries"
+        priority: 2
+        max_tokens: 4096
+      - name: "llama3.2:8b"
+        description: "Premium model for enterprise use"
+        priority: 3
+        max_tokens: 8192
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models-pvc
+  namespace: org-chatbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: org-chatbot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        ports:
+        - containerPort: 11434
+          name: http
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        - name: OLLAMA_ORIGINS
+          value: "*"
+        - name: OLLAMA_MODELS
+          value: "/root/.ollama/models"
+        volumeMounts:
+        - name: ollama-models
+          mountPath: /root/.ollama
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2000m"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+            nvidia.com/gpu: 1
+        livenessProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - |
+                sleep 10
+                ollama pull llama3.2:3b
+                ollama pull phi3:3.8b
+                echo "Models loaded successfully"
+      volumes:
+      - name: ollama-models
+        persistentVolumeClaim:
+          claimName: ollama-models-pvc
+      nodeSelector:
+        accelerator: nvidia-tesla-gpu
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: org-chatbot
+  labels:
+    app: ollama
+spec:
+  ports:
+  - port: 11434
+    targetPort: 11434
+    name: http
+  selector:
+    app: ollama
+  type: ClusterIP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ollama-pdb
+  namespace: org-chatbot
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ollama

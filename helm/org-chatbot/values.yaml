@@ -1,0 +1,237 @@
+# Default values for org-chatbot
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Image settings
+image:
+  repository: org-chatbot
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: org-chatbot/frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: org-chatbot.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: org-chatbot-tls
+        hosts:
+          - org-chatbot.com
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Chat API configuration
+chatApi:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: org-chatbot/chat-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+    metricsPort: 9090
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: api.org-chatbot.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: org-chatbot-api-tls
+        hosts:
+          - api.org-chatbot.com
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Ollama AI service configuration
+ollama:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ollama/ollama
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 11434
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+      nvidia.com/gpu: 1
+    requests:
+      cpu: 2000m
+      memory: 4Gi
+      nvidia.com/gpu: 1
+  nodeSelector:
+    accelerator: nvidia-tesla-gpu
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+# Redis configuration
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "secure-redis-password-123"
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "fast-ssd"
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "secure-postgres-password-123"
+    database: "org_chatbot"
+  primary:
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: "fast-ssd"
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    server:
+      persistentVolume:
+        enabled: true
+        size: 50Gi
+        storageClass: "fast-ssd"
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+        requests:
+          cpu: 500m
+          memory: 1Gi
+  grafana:
+    enabled: true
+    adminPassword: "admin123"
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "fast-ssd"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+# Security configuration
+security:
+  enabled: true
+  networkPolicy:
+    enabled: true
+  podSecurityPolicy:
+    enabled: true
+  rbac:
+    enabled: true
+  secrets:
+    jwtSecret: "super-secure-jwt-secret-key-for-production"
+    redisPassword: "secure-redis-password-123"
+    postgresPassword: "secure-postgres-password-123"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: org-chatbot.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: api.org-chatbot.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: grafana.org-chatbot.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: org-chatbot-tls
+      hosts:
+        - org-chatbot.com
+        - api.org-chatbot.com
+        - grafana.org-chatbot.com
