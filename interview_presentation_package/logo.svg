@@ -1,0 +1,72 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#gradient1)" opacity="0.1"/>
+  
+  <!-- Main Bot Head -->
+  <circle cx="100" cy="100" r="60" fill="url(#gradient1)" filter="url(#glow)"/>
+  
+  <!-- Bot Eyes -->
+  <circle cx="85" cy="85" r="8" fill="#ffffff"/>
+  <circle cx="115" cy="85" r="8" fill="#ffffff"/>
+  <circle cx="87" cy="83" r="3" fill="#667eea"/>
+  <circle cx="117" cy="83" r="3" fill="#667eea"/>
+  
+  <!-- Bot Mouth -->
+  <path d="M 85 110 Q 100 125 115 110" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  
+  <!-- Antenna -->
+  <line x1="100" y1="40" x2="100" y2="25" stroke="url(#gradient2)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="100" cy="22" r="5" fill="url(#gradient2)"/>
+  
+  <!-- Circuit Pattern -->
+  <g opacity="0.3">
+    <rect x="60" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="72" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="84" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="96" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="108" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="120" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="132" y="140" width="8" height="8" fill="#ffffff" rx="1"/>
+  </g>
+  
+  <!-- Connection Lines -->
+  <g opacity="0.2">
+    <line x1="64" y1="144" x2="68" y2="144" stroke="#ffffff" stroke-width="1"/>
+    <line x1="76" y1="144" x2="80" y2="144" stroke="#ffffff" stroke-width="1"/>
+    <line x1="88" y1="144" x2="92" y2="144" stroke="#ffffff" stroke-width="1"/>
+    <line x1="100" y1="144" x2="104" y2="144" stroke="#ffffff" stroke-width="1"/>
+    <line x1="112" y1="144" x2="116" y2="144" stroke="#ffffff" stroke-width="1"/>
+    <line x1="124" y1="144" x2="128" y2="144" stroke="#ffffff" stroke-width="1"/>
+  </g>
+  
+  <!-- Sparkles -->
+  <g opacity="0.8">
+    <path d="M 40 50 L 42 55 L 47 53 L 42 58 L 40 63 L 38 58 L 33 53 L 38 55 Z" fill="url(#gradient2)"/>
+    <path d="M 160 60 L 162 65 L 167 63 L 162 68 L 160 73 L 158 68 L 153 63 L 158 65 Z" fill="url(#gradient2)"/>
+    <path d="M 45 150 L 47 155 L 52 153 L 47 158 L 45 163 L 43 158 L 38 153 L 43 155 Z" fill="url(#gradient2)"/>
+    <path d="M 155 140 L 157 145 L 162 143 L 157 148 L 155 153 L 153 148 L 148 143 L 153 145 Z" fill="url(#gradient2)"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="url(#gradient1)">
+    ORG CHATBOT
+  </text>
+</svg>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 עוזר ארגוני חכם</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e1e5e9;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .welcome ul {
+            list-style: none;
+            text-align: right;
+        }
+
+        .welcome li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                width: 95%;
+                height: 90vh;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>🤖 עוזר ארגוני חכם</h1>
+            <p>בינה מלאכותית לעסקים</p>
+        </div>
+        
+        <div class="messages" id="messages">
+            <div class="welcome">
+                <h2>שלום! אני העוזר הארגוני החכם שלך</h2>
+                <p>אני כאן לעזור עם:</p>
+                <ul>
+                    <li>💡 פיתוח מוצרים ושירותים</li>
+                    <li>📈 אסטרטגיות שיווק</li>
+                    <li>👥 ניהול צוותים ופרויקטים</li>
+                    <li>🤖 טכנולוגיה ובינה מלאכותית</li>
+                </ul>
+                <p style="margin-top: 20px; font-weight: bold;">השאלה שלך:</p>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            🤖 העוזר כותב...
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="messageInput" class="input-field" placeholder="כתבו את השאלה שלכם כאן..." />
+            <button id="sendButton" class="send-button">שלח</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const loading = document.getElementById('loading');
+
+        let sessionId = null;
+        let userId = 'user_' + Math.random().toString(36).substr(2, 9);
+
+        // שליחת הודעה
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // הוספת הודעת המשתמש
+            addMessage(message, 'user');
+            messageInput.value = '';
+            
+            // הצגת טעינה
+            showLoading(true);
+            sendButton.disabled = true;
+
+            try {
+                const requestData = {
+                    message: message,
+                    user_id: userId
+                };
+                
+                // הוספת session_id רק אם קיים
+                if (sessionId) {
+                    requestData.session_id = sessionId;
+                }
+
+                console.log('Sending request:', requestData);
+
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    sessionId = data.session_id;
+                    
+                    // הוספת תשובת ה-AI
+                    setTimeout(() => {
+                        addMessage(data.response, 'ai', data.timestamp);
+                        showLoading(false);
+                        sendButton.disabled = false;
+                    }, 1000);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Server error:', response.status, errorText);
+                    throw new Error(`שגיאה בשרת: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage(`מצטער, אירעה שגיאה: ${error.message}. אנא נסה שוב.`, 'ai');
+                showLoading(false);
+                sendButton.disabled = false;
+            }
+        }
+
+        // הוספת הודעה לממשק
+        function addMessage(text, sender, timestamp = null) {
+            // הסרת הודעת הברכה אם קיימת
+            const welcome = messagesContainer.querySelector('.welcome');
+            if (welcome) {
+                welcome.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = text;
+
+            if (timestamp) {
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'timestamp';
+                timeDiv.textContent = new Date(timestamp).toLocaleTimeString('he-IL');
+                bubbleDiv.appendChild(timeDiv);
+            }
+
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+
+            // גלילה למטה
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // הצגת/הסתרת טעינה
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // אירועי מקלדת
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+
+        // בדיקת בריאות השרת
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    console.log('✅ השרת עובד');
+                } else {
+                    console.log('❌ בעיה בשרת');
+                }
+            } catch (error) {
+                console.log('❌ השרת לא זמין');
+            }
+        }
+
+        // בדיקה ראשונית
+        checkHealth();
+    </script>
+</body>
+</html>

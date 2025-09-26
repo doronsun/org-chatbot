@@ -1,0 +1,272 @@
+# Weaviate Vector Database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weaviate
+  namespace: org-chatbot
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: weaviate
+  template:
+    metadata:
+      labels:
+        app: weaviate
+    spec:
+      containers:
+      - name: weaviate
+        image: semitechnologies/weaviate:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: QUERY_DEFAULTS_LIMIT
+          value: "25"
+        - name: AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED
+          value: "true"
+        - name: PERSISTENCE_DATA_PATH
+          value: "/var/lib/weaviate"
+        - name: DEFAULT_VECTORIZER_MODULE
+          value: "none"
+        - name: ENABLE_MODULES
+          value: "text2vec-openai,text2vec-cohere,text2vec-huggingface"
+        - name: CLUSTER_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: weaviate-data
+          mountPath: /var/lib/weaviate
+        livenessProbe:
+          httpGet:
+            path: /v1/meta
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /v1/meta
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: weaviate-data
+        persistentVolumeClaim:
+          claimName: weaviate-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weaviate-service
+  namespace: org-chatbot
+spec:
+  selector:
+    app: weaviate
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: weaviate-pvc
+  namespace: org-chatbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+
+---
+# Neo4j Graph Database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo4j
+  namespace: org-chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo4j
+  template:
+    metadata:
+      labels:
+        app: neo4j
+    spec:
+      containers:
+      - name: neo4j
+        image: neo4j:5.15-community
+        ports:
+        - containerPort: 7474
+        - containerPort: 7687
+        env:
+        - name: NEO4J_AUTH
+          value: "neo4j/password"
+        - name: NEO4J_PLUGINS
+          value: '["apoc"]'
+        - name: NEO4J_dbms_security_procedures_unrestricted
+          value: "apoc.*"
+        - name: NEO4J_dbms_security_procedures_allowlist
+          value: "apoc.*"
+        - name: NEO4J_dbms_memory_heap_initial__size
+          value: "2G"
+        - name: NEO4J_dbms_memory_heap_max__size
+          value: "4G"
+        - name: NEO4J_dbms_memory_pagecache_size
+          value: "2G"
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        volumeMounts:
+        - name: neo4j-data
+          mountPath: /data
+        - name: neo4j-logs
+          mountPath: /logs
+        - name: neo4j-import
+          mountPath: /var/lib/neo4j/import
+        - name: neo4j-plugins
+          mountPath: /plugins
+        livenessProbe:
+          httpGet:
+            path: /db/manage/server/jmx/domain/neo4j/bean/neo4j%3Ainstance%3Dkernel%3A0%2Cname%3DKernel
+            port: 7474
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /db/manage/server/jmx/domain/neo4j/bean/neo4j%3Ainstance%3Dkernel%3A0%2Cname%3DKernel
+            port: 7474
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: neo4j-data
+        persistentVolumeClaim:
+          claimName: neo4j-data-pvc
+      - name: neo4j-logs
+        persistentVolumeClaim:
+          claimName: neo4j-logs-pvc
+      - name: neo4j-import
+        persistentVolumeClaim:
+          claimName: neo4j-import-pvc
+      - name: neo4j-plugins
+        persistentVolumeClaim:
+          claimName: neo4j-plugins-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neo4j-service
+  namespace: org-chatbot
+spec:
+  selector:
+    app: neo4j
+  ports:
+  - name: http
+    port: 7474
+    targetPort: 7474
+  - name: bolt
+    port: 7687
+    targetPort: 7687
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-data-pvc
+  namespace: org-chatbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-logs-pvc
+  namespace: org-chatbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-import-pvc
+  namespace: org-chatbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-plugins-pvc
+  namespace: org-chatbot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: fast-ssd
+
+---
+# Horizontal Pod Autoscaler for Weaviate
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: weaviate-hpa
+  namespace: org-chatbot
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: weaviate
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

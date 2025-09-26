@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-backend
+  namespace: enterprise-chatbot
+  labels:
+    app: enterprise-backend
+    version: v4.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: enterprise-backend
+  template:
+    metadata:
+      labels:
+        app: enterprise-backend
+        version: v4.0.0
+    spec:
+      containers:
+      - name: backend
+        image: enterprise-chatbot-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379/0"
+        - name: POSTGRES_URL
+          value: "postgresql://postgres:password@postgres:5432/enterprise_chatbot"
+        - name: WEAVIATE_URL
+          value: "http://weaviate:8080"
+        - name: NEO4J_URI
+          value: "bolt://neo4j:7687"
+        - name: MINIO_ENDPOINT
+          value: "http://minio:9000"
+        - name: OLLAMA_URL
+          value: "http://ollama:11434"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: enterprise-secrets
+              key: jwt-secret
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: enterprise-secrets
+              key: encryption-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: backend-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-backend
+  namespace: enterprise-chatbot
+  labels:
+    app: enterprise-backend
+spec:
+  selector:
+    app: enterprise-backend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: enterprise-backend-hpa
+  namespace: enterprise-chatbot
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: enterprise-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

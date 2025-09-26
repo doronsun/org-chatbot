@@ -1,0 +1,194 @@
+<svg width="1000" height="700" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dashboardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="metricGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="alertGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1000" height="700" fill="url(#dashboardGrad)"/>
+  
+  <!-- Title -->
+  <text x="500" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff">
+    📊 Org Chatbot - Real-time Monitoring Dashboard
+  </text>
+  
+  <!-- System Overview Panel -->
+  <g transform="translate(20, 60)">
+    <rect x="0" y="0" width="300" height="200" fill="rgba(255,255,255,0.1)" rx="10" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="150" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">
+      🖥️ System Overview
+    </text>
+    
+    <!-- CPU Usage -->
+    <text x="20" y="55" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">CPU Usage</text>
+    <rect x="20" y="60" width="200" height="15" fill="rgba(255,255,255,0.2)" rx="7"/>
+    <rect x="20" y="60" width="120" height="15" fill="#10b981" rx="7"/>
+    <text x="230" y="72" font-family="Arial, sans-serif" font-size="11" fill="#10b981">60%</text>
+    
+    <!-- Memory Usage -->
+    <text x="20" y="90" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Memory Usage</text>
+    <rect x="20" y="95" width="200" height="15" fill="rgba(255,255,255,0.2)" rx="7"/>
+    <rect x="20" y="95" width="140" height="15" fill="#f59e0b" rx="7"/>
+    <text x="230" y="107" font-family="Arial, sans-serif" font-size="11" fill="#f59e0b">70%</text>
+    
+    <!-- Network I/O -->
+    <text x="20" y="125" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Network I/O</text>
+    <rect x="20" y="130" width="200" height="15" fill="rgba(255,255,255,0.2)" rx="7"/>
+    <rect x="20" y="130" width="80" height="15" fill="#3b82f6" rx="7"/>
+    <text x="230" y="142" font-family="Arial, sans-serif" font-size="11" fill="#3b82f6">40%</text>
+    
+    <!-- Status Indicators -->
+    <circle cx="50" cy="170" r="8" fill="#10b981"/>
+    <text x="70" y="175" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">All Systems Operational</text>
+  </g>
+  
+  <!-- Application Metrics Panel -->
+  <g transform="translate(340, 60)">
+    <rect x="0" y="0" width="300" height="200" fill="rgba(255,255,255,0.1)" rx="10" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="150" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">
+      📈 Application Metrics
+    </text>
+    
+    <!-- Request Rate -->
+    <text x="20" y="55" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Request Rate</text>
+    <text x="200" y="55" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#10b981">1,247/min</text>
+    
+    <!-- Response Time -->
+    <text x="20" y="80" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Avg Response Time</text>
+    <text x="200" y="80" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#3b82f6">245ms</text>
+    
+    <!-- Error Rate -->
+    <text x="20" y="105" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Error Rate</text>
+    <text x="200" y="105" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ef4444">0.2%</text>
+    
+    <!-- Active Users -->
+    <text x="20" y="130" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Active Users</text>
+    <text x="200" y="130" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#8b5cf6">892</text>
+    
+    <!-- Mini Chart -->
+    <path d="M 20 160 Q 80 140 140 150 Q 200 160 260 145" stroke="#10b981" stroke-width="2" fill="none"/>
+    <text x="20" y="185" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Request Rate Trend (Last Hour)</text>
+  </g>
+  
+  <!-- AI Performance Panel -->
+  <g transform="translate(660, 60)">
+    <rect x="0" y="0" width="300" height="200" fill="rgba(255,255,255,0.1)" rx="10" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="150" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">
+      🤖 AI Performance
+    </text>
+    
+    <!-- Model Inference Time -->
+    <text x="20" y="55" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Avg Inference Time</text>
+    <text x="200" y="55" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#f59e0b">1.2s</text>
+    
+    <!-- Token Usage -->
+    <text x="20" y="80" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Tokens/Min</text>
+    <text x="200" y="80" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#06b6d4">45,678</text>
+    
+    <!-- Model Accuracy -->
+    <text x="20" y="105" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Model Accuracy</text>
+    <text x="200" y="105" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#10b981">94.5%</text>
+    
+    <!-- GPU Utilization -->
+    <text x="20" y="130" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">GPU Utilization</text>
+    <rect x="20" y="135" width="200" height="15" fill="rgba(255,255,255,0.2)" rx="7"/>
+    <rect x="20" y="135" width="160" height="15" fill="#ef4444" rx="7"/>
+    <text x="230" y="147" font-family="Arial, sans-serif" font-size="11" fill="#ef4444">80%</text>
+    
+    <!-- Model Status -->
+    <circle cx="50" cy="170" r="8" fill="#10b981"/>
+    <text x="70" y="175" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">All Models Active</text>
+  </g>
+  
+  <!-- Real-time Charts -->
+  <g transform="translate(20, 280)">
+    <rect x="0" y="0" width="960" height="180" fill="rgba(255,255,255,0.1)" rx="10" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="480" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">
+      📊 Real-time Performance Charts
+    </text>
+    
+    <!-- Request Rate Chart -->
+    <g transform="translate(30, 50)">
+      <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Request Rate (RPM)</text>
+      <path d="M 0 80 L 50 70 L 100 60 L 150 65 L 200 55 L 250 50 L 300 45 L 350 40 L 400 35" 
+            stroke="#10b981" stroke-width="2" fill="none"/>
+      <text x="400" y="120" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Last 5 minutes</text>
+    </g>
+    
+    <!-- Response Time Chart -->
+    <g transform="translate(500, 50)">
+      <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Response Time (ms)</text>
+      <path d="M 0 80 L 50 75 L 100 70 L 150 65 L 200 60 L 250 55 L 300 50 L 350 45 L 400 40" 
+            stroke="#3b82f6" stroke-width="2" fill="none"/>
+      <text x="400" y="120" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Last 5 minutes</text>
+    </g>
+  </g>
+  
+  <!-- Alerts Panel -->
+  <g transform="translate(20, 480)">
+    <rect x="0" y="0" width="960" height="100" fill="rgba(239, 68, 68, 0.1)" rx="10" stroke="rgba(239, 68, 68, 0.3)" stroke-width="1"/>
+    <text x="480" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ef4444">
+      🚨 Active Alerts
+    </text>
+    
+    <!-- Alert Items -->
+    <g transform="translate(30, 40)">
+      <circle cx="10" cy="15" r="4" fill="#ef4444"/>
+      <text x="25" y="20" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">High CPU usage on node-3 (85%)</text>
+      <text x="600" y="20" font-family="Arial, sans-serif" font-size="10" fill="#64748b">2 minutes ago</text>
+      
+      <circle cx="10" cy="35" r="4" fill="#f59e0b"/>
+      <text x="25" y="40" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Response time spike detected</text>
+      <text x="600" y="40" font-family="Arial, sans-serif" font-size="10" fill="#64748b">5 minutes ago</text>
+      
+      <circle cx="10" cy="55" r="4" fill="#10b981"/>
+      <text x="25" y="60" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">All systems normal</text>
+      <text x="600" y="60" font-family="Arial, sans-serif" font-size="10" fill="#64748b">10 minutes ago</text>
+    </g>
+  </g>
+  
+  <!-- Service Status -->
+  <g transform="translate(20, 590)">
+    <rect x="0" y="0" width="960" height="80" fill="rgba(255,255,255,0.05)" rx="10"/>
+    <text x="480" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+      🔧 Service Status
+    </text>
+    
+    <g transform="translate(50, 40)">
+      <circle cx="10" cy="10" r="6" fill="#10b981"/>
+      <text x="25" y="15" font-family="Arial, sans-serif" font-size="11" fill="#ffffff">Frontend (3/3 pods)</text>
+      
+      <circle cx="150" cy="10" r="6" fill="#10b981"/>
+      <text x="165" y="15" font-family="Arial, sans-serif" font-size="11" fill="#ffffff">Chat API (3/3 pods)</text>
+      
+      <circle cx="290" cy="10" r="6" fill="#10b981"/>
+      <text x="305" y="15" font-family="Arial, sans-serif" font-size="11" fill="#ffffff">Ollama (2/2 pods)</text>
+      
+      <circle cx="430" cy="10" r="6" fill="#10b981"/>
+      <text x="445" y="15" font-family="Arial, sans-serif" font-size="11" fill="#ffffff">Redis (1/1 pods)</text>
+      
+      <circle cx="570" cy="10" r="6" fill="#10b981"/>
+      <text x="585" y="15" font-family="Arial, sans-serif" font-size="11" fill="#ffffff">PostgreSQL (1/1 pods)</text>
+      
+      <circle cx="710" cy="10" r="6" fill="#10b981"/>
+      <text x="725" y="15" font-family="Arial, sans-serif" font-size="11" fill="#ffffff">Prometheus (1/1 pods)</text>
+    </g>
+  </g>
+</svg>
